@@ -267,56 +267,6 @@ public class PixelPropsUtils {
         }
     }
 
-    public static void spoofBuildGms(Context context) {
-        String packageName = "com.goolag.pif";
-
-        if (!Utils.isPackageInstalled(context, packageName)) {
-            Log.e(TAG, "'" + packageName + "' is not installed.");
-            return;
-        }
-
-        PackageManager pm = context.getPackageManager();
-
-        try {
-            Resources resources = pm.getResourcesForApplication(packageName);
-
-            int resourceId = resources.getIdentifier("device_arrays", "array", packageName);
-            if (resourceId != 0) {
-                String[] deviceArrays = resources.getStringArray(resourceId);
-
-                if (deviceArrays.length > 0) {
-                    int randomIndex = new Random().nextInt(deviceArrays.length);
-                    int selectedArrayResId = resources.getIdentifier(deviceArrays[randomIndex], "array", packageName);
-                    String selectedArrayName = resources.getResourceEntryName(selectedArrayResId);
-                    String[] selectedDeviceProps = resources.getStringArray(selectedArrayResId);
-
-                    setPropValue("MANUFACTURER", selectedDeviceProps[0]);
-                    setPropValue("MODEL", selectedDeviceProps[1]);
-                    setPropValue("FINGERPRINT", selectedDeviceProps[2]);
-                    setPropValue("BRAND", selectedDeviceProps[3]);
-                    setPropValue("PRODUCT", selectedDeviceProps[4]);
-                    setPropValue("DEVICE", selectedDeviceProps[5].isEmpty() ? getDeviceName(selectedDeviceProps[2]) : selectedDeviceProps[5]);
-                    setVersionFieldString("RELEASE", selectedDeviceProps[6]);
-                    setPropValue("ID", selectedDeviceProps[7].isEmpty() ? getBuildID(selectedDeviceProps[2]) : selectedDeviceProps[7]);
-                    setVersionFieldString("INCREMENTAL", selectedDeviceProps[8]);
-                    setPropValue("TYPE", selectedDeviceProps[9].isEmpty() ? "user" : selectedDeviceProps[9]);
-                    setPropValue("TAGS", selectedDeviceProps[10].isEmpty() ? "release-keys" : selectedDeviceProps[10]);
-                    setVersionFieldString("SECURITY_PATCH", selectedDeviceProps[11]);
-                    setVersionFieldInt("DEVICE_INITIAL_SDK_INT", Integer.parseInt(selectedDeviceProps[12]));
-
-                    Settings.System.putString(context.getContentResolver(), Settings.System.PPU_SPOOF_BUILD_GMS_ARRAY, selectedArrayName);
-                } else {
-                    Log.e(TAG, "No device arrays found.");
-                }
-            } else {
-                Log.e(TAG, "Resource 'device_arrays' not found.");
-            }
-
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Error getting resources for '" + packageName + "': " + e.getMessage());
-        }
-    }
-
     public static void setProps(Context context) {
         final String packageName = context.getPackageName();
         final String processName = Application.getProcessName();
@@ -334,13 +284,7 @@ public class PixelPropsUtils {
         if (sIsExcluded) {
             return;
         }
-        if (sIsGms) {
-            if (shouldTryToCertifyDevice()) {
-                dlog("Spoofing GMS to pass integrity");
-                setPropValue("TIME", System.currentTimeMillis());
-                spoofBuildGms(context);
-            }
-        } else if ((packageName.toLowerCase().contains(PACKAGE_GOOGLE) && !sIsGms)
+        if ((packageName.toLowerCase().contains(PACKAGE_GOOGLE) && !sIsGms)
                 || packageName.toLowerCase().contains(PACKAGE_SAMSUNG)
                 || Arrays.asList(extraPackagesToChange).contains(packageName)) {
 
@@ -383,6 +327,7 @@ public class PixelPropsUtils {
             dlog("Defining " + key + " prop for: " + packageName);
             setPropValue(key, value);
         }
+
         // Set proper indexing fingerprint
         if (packageName.equals(PACKAGE_SI)) {
             setPropValue("FINGERPRINT", String.valueOf(Build.TIME));
@@ -472,20 +417,6 @@ public class PixelPropsUtils {
         final String callingPackage = context.getPackageManager().getNameForUid(callingUid);
         dlog("shouldBypassTaskPermission: callingPackage:" + callingPackage);
         return callingPackage != null && callingPackage.toLowerCase().contains("google");
-    }
-
-    private static boolean isCallerSafetyNet() {
-        return Arrays.stream(Thread.currentThread().getStackTrace())
-                        .anyMatch(elem -> elem.getClassName().toLowerCase()
-                            .contains("droidguard"));
-    }
-
-    public static void onEngineGetCertificateChain() {
-        // Check stack for SafetyNet or Play Integrity
-        if ((isCallerSafetyNet() || sIsFinsky) && !sIsExcluded) {
-            dlog("Blocked key attestation");
-            throw new UnsupportedOperationException();
-        }
     }
 
     public static void dlog(String msg) {
