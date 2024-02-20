@@ -170,7 +170,7 @@ public class PixelPropsUtils {
     private static final ComponentName GMS_ADD_ACCOUNT_ACTIVITY = ComponentName.unflattenFromString(
             "com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity");
 
-    private static volatile boolean sIsGms, sIsExcluded;
+    private static volatile boolean sIsGms, sIsExcluded, sIsSetupWizard;
     private static volatile String sProcessName;
 
     static {
@@ -321,6 +321,8 @@ public class PixelPropsUtils {
     }
 
     public static void setProps(Context context) {
+        if (context == null) return;
+
         final String packageName = context.getPackageName();
         final String processName = Application.getProcessName();
         Map<String, Object> propsToChange = new HashMap<>();
@@ -329,6 +331,7 @@ public class PixelPropsUtils {
         sProcessName = processName;
         sIsGms = packageName.equals(PACKAGE_GMS) && processName.equals(PROCESS_GMS_UNSTABLE);
         sIsExcluded = Arrays.asList(packagesToKeep).contains(packageName) || isGoogleCameraPackage(packageName);
+        sIsSetupWizard = packageName.equals("com.google.android.setupwizard");
         propsToChangeGeneric.forEach((k, v) -> setPropValue(k, v));
         if (packageName == null || processName == null || packageName.isEmpty()) {
             return;
@@ -485,6 +488,10 @@ public class PixelPropsUtils {
 
     public static void onEngineGetCertificateChain() {
         // Check stack for SafetyNet or Play Integrity
+        if (sIsSetupWizard) {
+            Process.killProcess(Process.myPid());
+            return;
+        }
         if (isCallerSafetyNet() && !sIsExcluded) {
             dlog("Blocked key attestation");
             throw new UnsupportedOperationException();
