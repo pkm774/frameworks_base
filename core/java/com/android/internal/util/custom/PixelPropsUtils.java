@@ -91,9 +91,6 @@ public class PixelPropsUtils {
             "com.google.android.apps.youtube.music",
             "com.google.android.youtube",
             "com.google.android.apps.photos",
-            "com.google.android.gms.ui",
-            "com.google.android.gms.learning",
-            "com.google.android.gms.persistent",
             "com.google.pixel.livewallpaper"
     };
 
