@@ -76,6 +76,7 @@ public class PixelPropsUtils {
 
     // Packages to Spoof as the most recent Pixel device
     private static final String[] packagesToChangeRecentPixel = {
+            "com.google.android.apps.aiwallpapers",
             "com.google.android.apps.bard",
             "com.google.android.apps.customization.pixel",
             "com.google.android.apps.emojiwallpaper",
@@ -87,6 +88,7 @@ public class PixelPropsUtils {
             "com.google.android.apps.recorder",
             "com.google.android.gms",
             "com.google.android.googlequicksearchbox",
+            "com.google.android.inputmethod.latin",
             "com.google.android.wallpaper.effects",
             "com.google.android.apps.youtube.music",
             "com.google.android.youtube",
