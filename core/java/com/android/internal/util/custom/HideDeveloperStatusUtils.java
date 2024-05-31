@@ -1,4 +1,4 @@
-package com.android.internal.util.crdroid;
+package com.android.internal.util.custom;
 
 import android.content.ContentResolver;
 import android.content.Context;
