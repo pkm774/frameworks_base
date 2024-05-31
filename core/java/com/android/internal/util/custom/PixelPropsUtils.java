@@ -76,6 +76,8 @@ public class PixelPropsUtils {
 
     // Packages to Spoof as the most recent Pixel device
     private static final String[] packagesToChangeRecentPixel = {
+            "com.android.chrome",
+            "com.breel.wallpapers20",
             "com.google.android.apps.aiwallpapers",
             "com.google.android.apps.bard",
             "com.google.android.apps.customization.pixel",
@@ -96,16 +98,14 @@ public class PixelPropsUtils {
             "com.google.android.gms.ui",
             "com.google.android.gms.learning",
             "com.google.android.gms.persistent",
-            "com.google.pixel.livewallpaper"
+            "com.google.pixel.livewallpaper",
+            "com.nhs.online.nhsonline"
     };
 
     private static final String[] extraPackagesToChange = {
             "com.amazon.avod.thirdpartyclient",
-            "com.android.chrome",
-            "com.breel.wallpapers20",
             "com.disney.disneyplus",
             "com.microsoft.android.smsorganizer",
-            "com.nhs.online.nhsonline",
             "com.nothing.smartcenter",
             "in.startv.hotstar",
             "jp.id_credit_sp2.android"
@@ -346,6 +346,7 @@ public class PixelPropsUtils {
             }
         } else if ((packageName.toLowerCase().contains(PACKAGE_GOOGLE) && !sIsGms)
                 || packageName.toLowerCase().contains(PACKAGE_SAMSUNG)
+                || Arrays.asList(packagesToChangeRecentPixel).contains(packageName)
                 || Arrays.asList(extraPackagesToChange).contains(packageName)) {
 
             boolean isPixelDevice = Arrays.asList(pixelCodenames).contains(SystemProperties.get(DEVICE));
@@ -356,10 +357,13 @@ public class PixelPropsUtils {
                 if (packageName.toLowerCase().contains("com.google.android.gms")) {
                     if (processName.toLowerCase().contains("update")) {
                         return;
-                    } else if (processName.toLowerCase().contains("chimera")
+                    } else if (processName.toLowerCase().contains("ui")
+                            || processName.toLowerCase().contains("gapps")
                             || processName.toLowerCase().contains("gservice")
-                            || processName.toLowerCase().contains("gapps")) {
-                        propsToChange.putAll(propsToChangePixel5a);
+                            || processName.toLowerCase().contains("learning")
+                            || processName.toLowerCase().contains("persistent")
+                            || processName.toLowerCase().contains("search")) {
+			propsToChange.putAll(propsToChangePixel5a);
                     }
                     setPropValue("TIME", System.currentTimeMillis());
                 }
@@ -368,9 +372,6 @@ public class PixelPropsUtils {
             } else if (sIsTablet) {
                 dlog("Spoofing Pixel Tablet for Google Services");
                 propsToChange.putAll(propsToChangePixelTablet);
-            } else {
-                dlog("Spoofing Pixel 8 Pro for Google Services");
-                propsToChange.putAll(propsToChangeRecentPixel);
             }
         } else if (SystemProperties.getBoolean(SPOOF_MUSIC_APPS, false)
                 && Arrays.asList(packagesToChangeMeizu).contains(packageName)) {
