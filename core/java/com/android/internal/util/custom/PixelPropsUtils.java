@@ -2,7 +2,7 @@
  * Copyright (C) 2020 The Pixel Experience Project
  *               2022 StatiXOS
  *               2021-2022 crDroid Android Project
- *               2019-2023 Evolution X
+ *               2019-2024 The Evolution X Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,6 @@ import java.util.regex.Matcher;
 
 public class PixelPropsUtils {
 
-    private static final String PACKAGE_FINSKY = "com.android.vending";
     private static final String PACKAGE_GMS = "com.google.android.gms";
     private static final String PROCESS_GMS_UNSTABLE = PACKAGE_GMS + ".unstable";
     private static final String PACKAGE_GOOGLE = "com.google";
@@ -90,7 +89,6 @@ public class PixelPropsUtils {
             "com.google.android.apps.recorder",
             "com.google.android.gms",
             "com.google.android.googlequicksearchbox",
-            "com.google.android.inputmethod.latin",
             "com.google.android.wallpaper.effects",
             "com.google.android.apps.youtube.music",
             "com.google.android.youtube",
@@ -135,6 +133,7 @@ public class PixelPropsUtils {
             "com.google.android.backuptransport",
             "com.google.android.dialer",
             "com.google.android.euicc",
+            "com.google.android.inputmethod.latin",
             "com.google.android.setupwizard",
             "com.google.ar.core",
             "com.google.intelligence.sense",
@@ -171,7 +170,7 @@ public class PixelPropsUtils {
     private static final ComponentName GMS_ADD_ACCOUNT_ACTIVITY = ComponentName.unflattenFromString(
             "com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity");
 
-    private static volatile boolean sIsGms, sIsFinsky, sIsExcluded;
+    private static volatile boolean sIsGms, sIsExcluded;
     private static volatile String sProcessName;
 
     static {
@@ -330,7 +329,6 @@ public class PixelPropsUtils {
         sProcessName = processName;
         sIsGms = packageName.equals(PACKAGE_GMS) && processName.equals(PROCESS_GMS_UNSTABLE);
         sIsExcluded = Arrays.asList(packagesToKeep).contains(packageName) || isGoogleCameraPackage(packageName);
-        sIsFinsky = packageName.equals(PACKAGE_FINSKY);
         propsToChangeGeneric.forEach((k, v) -> setPropValue(k, v));
         if (packageName == null || processName == null || packageName.isEmpty()) {
             return;
@@ -487,7 +485,7 @@ public class PixelPropsUtils {
 
     public static void onEngineGetCertificateChain() {
         // Check stack for SafetyNet or Play Integrity
-        if ((isCallerSafetyNet() || sIsFinsky) && !sIsExcluded) {
+        if (isCallerSafetyNet() && !sIsExcluded) {
             dlog("Blocked key attestation");
             throw new UnsupportedOperationException();
         }
