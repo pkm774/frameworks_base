@@ -238,19 +238,20 @@ public class PixelPropsUtils {
                 || Arrays.asList(customGoogleCameraPackages).contains(packageName);
     }
 
-    private static boolean shouldTryToCertifyDevice() {
+    private static boolean shouldTryToCertifyDevice(Context context) {
+        if (!sIsGms) return false;
+
         final String processName = Application.getProcessName();
         if (!processName.toLowerCase().contains("unstable")
                 && !processName.toLowerCase().contains("pixelmigrate")
                 && !processName.toLowerCase().contains("instrumentation")) {
             return false;
         }
+
+        setPropValue("TIME", System.currentTimeMillis());
+
         final boolean was = isGmsAddAccountActivityOnTop();
         final String reason = "GmsAddAccountActivityOnTop";
-        if (!was) {
-            return true;
-        }
-        dlog("Skip spoofing build for GMS, because " + reason + "!");
         TaskStackListener taskStackListener = new TaskStackListener() {
             @Override
             public void onTaskStackChanged() {
@@ -261,13 +262,21 @@ public class PixelPropsUtils {
                 }
             }
         };
+
+        if (!was) {
+            dlog("Spoofing GMS to pass integrity");
+            spoofBuildGms(context);
+        } else {
+            dlog("Skip spoofing build for GMS, because " + reason + "!");
+        }
+
         try {
             ActivityTaskManager.getService().registerTaskStackListener(taskStackListener);
-            return false;
         } catch (Exception e) {
             Log.e(TAG, "Failed to register task stack listener!", e);
-            return true;
         }
+
+        return true;
     }
 
     public static void spoofBuildGms(Context context) {
@@ -333,19 +342,20 @@ public class PixelPropsUtils {
         sIsExcluded = Arrays.asList(packagesToKeep).contains(packageName) || isGoogleCameraPackage(packageName);
         sIsSetupWizard = packageName.equals("com.google.android.setupwizard");
         propsToChangeGeneric.forEach((k, v) -> setPropValue(k, v));
+
         if (packageName == null || processName == null || packageName.isEmpty()) {
             return;
         }
+
         if (sIsExcluded) {
             return;
         }
-        if (sIsGms) {
-            if (shouldTryToCertifyDevice()) {
-                dlog("Spoofing GMS to pass integrity");
-                setPropValue("TIME", System.currentTimeMillis());
-                spoofBuildGms(context);
-            }
-        } else if ((packageName.toLowerCase().contains(PACKAGE_GOOGLE) && !sIsGms)
+
+        if (shouldTryToCertifyDevice(context)) {
+            return;
+        }
+
+        if ((packageName.toLowerCase().contains(PACKAGE_GOOGLE) && !sIsGms)
                 || packageName.toLowerCase().contains(PACKAGE_SAMSUNG)
                 || Arrays.asList(packagesToChangeRecentPixel).contains(packageName)
                 || Arrays.asList(extraPackagesToChange).contains(packageName)) {
