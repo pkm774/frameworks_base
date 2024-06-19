@@ -43,14 +43,6 @@
     <!-- For dynamic default font styles -->
     <java-symbol type="string" name="config_bodyFontFamily" />
 
-    <!-- PropImitationHooks -->
-    <java-symbol type="array" name="config_certifiedBuildProperties" />
-    <java-symbol type="bool" name="config_spoofGoogleApps" />
-    <java-symbol type="string" name="config_stockFingerprint" />
-    <java-symbol type="string" name="config_finskyFingerprint" />
-    <java-symbol type="string" name="config_netflixSpoofModel" />
-    <java-symbol type="bool" name="config_spoofasTablet" />
-
     <!-- Alert Slider -->
     <java-symbol type="string" name="alert_slider_state_path" />
     <java-symbol type="string" name="alert_slider_uevent_match_path" />
@@ -144,8 +136,4 @@
 
     <!-- Enforce DisplayModeDirector to select user preferred resolution -->
     <java-symbol type="bool" name="config_forceToUseSelectedResolution" />
-
-    <!-- Define device configs on boot -->
-    <java-symbol type="array" name="global_device_configs_override" />
-    <java-symbol type="array" name="device_configs_override" />
 </resources>
